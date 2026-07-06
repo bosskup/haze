@@ -1,3 +1,36 @@
+ ==========================================
+-- 🛑 การตรวจสอบคีย์ด่านสุดท้าย (Anti-Bypass)
+-- ==========================================
+local HttpService = game:GetService("HttpService")
+local hwid = tostring(game:GetService("Players").LocalPlayer.UserId)
+local workerUrl = "https://keysdatabase.bosswattanai.workers.dev"
+local userKey = getgenv().script_key -- รับคีย์มาจาก UI หน้า Map Selector
+
+-- ถ้าไม่มีคีย์ส่งมา (แปลว่าแอบใช้ loadstring ตรงๆ) ให้เตะทิ้งทันที
+if not userKey or userKey == "" or userKey == "KEY_XXXXX" then
+    game.Players.LocalPlayer:Kick("Security Alert: Missing API Key! Please execute from the main Hex Hub loader.")
+    while true do task.wait() end
+    return
+end
+
+-- เช็กคีย์กับฐานข้อมูลอีกรอบ เพื่อกันคนหลอกแก้ค่า getgenv() ในเครื่องตัวเอง
+local success, result = pcall(function()
+    return game:HttpGet(workerUrl .. "/check?key=" .. userKey .. "&hwid=" .. hwid)
+end)
+
+if not success or not string.find(result, "สคริปต์ทำงาน") then
+    game.Players.LocalPlayer:Kick("Security Alert: Invalid or expired key bypass detected!")
+    while true do task.wait() end
+    return
+end
+
+print("Double Check Passed! Loading Haze Seas...")
+-- ==========================================
+-- สิ้นสุดระบบตรวจสอบคีย์
+-- ==========================================
+
+
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
